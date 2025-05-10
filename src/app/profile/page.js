@@ -3,17 +3,22 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
+import InfoBox from '../../components/layout/InfoBox'
+import SuccessBox from '../../components/layout/SuccessBox'
 
 export default function ProfilePage() {
   const session = useSession();
   const { status } = session;
   const [userName, setUserName] = useState("");
+  const [image, setImage] = useState("");
   const [saved, setSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     if (status === "authenticated") {
       setUserName(session?.data?.user?.name);
+      setImage(session.data.user.image);
     }
   }, [session, status]);
 
@@ -24,7 +29,7 @@ export default function ProfilePage() {
     const response = await fetch("/api/profile", {
       method: "PUT",
       headers: { "Contnet-Type": "application/json" },
-      body: JSON.stringify({ name: userName }),
+      body: JSON.stringify({ name: userName, image }),
     });
     setIsSaving(false);
     if (response.ok) {
@@ -33,15 +38,18 @@ export default function ProfilePage() {
   }
 
   async function handleFileCHange(e) {
-    const files = e.target.files
-    if(files?.length === 1) {
-      const data = new FormData
-      data.set('file',files[0])
-      await fetch('/api/upload', {
-        method: 'POST',
+    const files = e.target.files;
+    if (files?.length === 1) {
+      const data = new FormData();
+      data.set("file", files[0]);
+      setIsUploading(true);
+      const response = await fetch("/api/upload", {
+        method: "POST",
         body: data,
-        // headers: {'Content-Type': 'multipart/form-data'}
-      })
+      });
+      const { link } = await response.json();
+      setImage(link);
+      setIsUploading(false);
     }
   }
 
@@ -53,36 +61,41 @@ export default function ProfilePage() {
     return redirect("/login");
   }
 
-  const userImage = session.data.user.image;
-
   return (
     <section className="mt-8">
       <h1 className="text-center text-primary text-4xl mb-4">Profile</h1>
       <div className="max-w-md mx-auto ">
         {saved && (
-          <h2 className="text-center bg-green-100 p-4 rounded-lg border border-green-300 ">
-            Profile Saved!
-          </h2>
+          <SuccessBox>Profile Saved!</SuccessBox>
         )}
 
         {isSaving && (
-          <h2 className="text-center bg-blue-100 p-4 rounded-lg border border-blue-300 ">
-            Saving...
-          </h2>
+          <InfoBox>Saving...</InfoBox>
+        )}
+
+        {isUploading && (
+          <InfoBox>Uploading...</InfoBox>
         )}
 
         <div className="flex gap-4 items-center">
           <div>
-            <div className="p-2 rounded-lg relative">
-              <Image
-                className="rounded w-full h-full mb-2"
-                src={userImage}
-                width={250}
-                height={250}
-                alt={"avatar"}
-              />
+            <div className="p-2 rounded-lg relative max-w-[120px]">
+              {image && (
+                <Image
+                  className="rounded w-full h-full mb-2"
+                  src={image}
+                  width={250}
+                  height={250}
+                  alt={"avatar"}
+                />
+              )}
+
               <label>
-                <input type="file" className="hidden" onChange={handleFileCHange} />
+                <input
+                  type="file"
+                  className="hidden"
+                  onChange={handleFileCHange}
+                />
                 <span className="block border border-gray-300 p-2 text-center rounded-lg cursor-pointer ">
                   Edit
                 </span>

@@ -5,6 +5,10 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "*.googleusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "mhd-food-ordering.s3.amazonaws.com",
       }
     ],
   },
