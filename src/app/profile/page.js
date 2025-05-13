@@ -3,17 +3,13 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
-import InfoBox from '../../components/layout/InfoBox'
-import SuccessBox from '../../components/layout/SuccessBox'
+import toast from "react-hot-toast";
 
 export default function ProfilePage() {
   const session = useSession();
   const { status } = session;
   const [userName, setUserName] = useState("");
   const [image, setImage] = useState("");
-  const [saved, setSaved] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     if (status === "authenticated") {
@@ -24,17 +20,23 @@ export default function ProfilePage() {
 
   async function handleProfileInfoUpdate(e) {
     e.preventDefault();
-    setSaved(false);
-    setIsSaving(true);
-    const response = await fetch("/api/profile", {
-      method: "PUT",
-      headers: { "Contnet-Type": "application/json" },
-      body: JSON.stringify({ name: userName, image }),
+    const savingPromise = new Promise(async (resolve, reject) => {
+      const response = await fetch("/api/profile", {
+        method: "PUT",
+        headers: { "Contnet-Type": "application/json" },
+        body: JSON.stringify({ name: userName, image }),
+      });
+      if (response.ok) {
+        resolve();
+      } else {
+        reject();
+      }
     });
-    setIsSaving(false);
-    if (response.ok) {
-      setSaved(true);
-    }
+    await toast.promise(savingPromise, {
+      loading: "Saving...",
+      success: "Profile saved",
+      error: "Saving failed!",
+    });
   }
 
   async function handleFileCHange(e) {
@@ -42,14 +44,24 @@ export default function ProfilePage() {
     if (files?.length === 1) {
       const data = new FormData();
       data.set("file", files[0]);
-      setIsUploading(true);
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: data,
+      const uploadPromise = new Promise(async (resolve, reject) => {
+        const response = await fetch("/api/upload", {
+          method: "POST",
+          body: data,
+        });
+        if (response.ok) {
+          const { link } = await response.json();
+          setImage(link);
+          resolve();
+        } else {
+          reject();
+        }
       });
-      const { link } = await response.json();
-      setImage(link);
-      setIsUploading(false);
+      await toast.promise(uploadPromise, {
+        loading: "Uploading...",
+        success: "Upload completed",
+        error: "Upload error",
+      });
     }
   }
 
@@ -65,18 +77,6 @@ export default function ProfilePage() {
     <section className="mt-8">
       <h1 className="text-center text-primary text-4xl mb-4">Profile</h1>
       <div className="max-w-md mx-auto ">
-        {saved && (
-          <SuccessBox>Profile Saved!</SuccessBox>
-        )}
-
-        {isSaving && (
-          <InfoBox>Saving...</InfoBox>
-        )}
-
-        {isUploading && (
-          <InfoBox>Uploading...</InfoBox>
-        )}
-
         <div className="flex gap-4 items-center">
           <div>
             <div className="p-2 rounded-lg relative max-w-[120px]">
