@@ -1,12 +1,26 @@
 "use client";
 import UserTabs from "@/components/layout/user-tabs";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useProfile } from "@/components/UseProfile";
 import toast from "react-hot-toast";
 
 export default function CategoriesPage() {
-  const [categoryNewName, setNewCategoryName] = useState("");
+  const [categoryName, setCategoryName] = useState("");
+  const [categories, setCategories] = useState([]);
+  const [editedCategory, setEditedCategory] = useState(null);
   const { loading: profileLoading, data: profileData } = useProfile();
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  function fetchCategories() {
+    fetch("/api/categories").then((res) => {
+      res.json().then((categories) => {
+        setCategories(categories);
+      });
+    });
+  }
 
   if (profileLoading) {
     return "Loading info...";
@@ -15,48 +29,83 @@ export default function CategoriesPage() {
   if (!profileData) {
     return "Not an admin";
   }
+  
 
   async function handleCategorySubmit(e) {
     e.preventDefault();
     const creationPromise = new Promise(async (resolve, reject) => {
-      const response = await fetch("/api/category", {
-        method: "POST",
+      const data = { name: categoryName };
+      if (editedCategory) {
+        data._id = editedCategory._id;
+      }
+      const response = await fetch("/api/categories", {
+        method: editedCategory ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: categoryNewName }),
+        body: JSON.stringify(data),
       });
       if (response.ok) {
         resolve();
       } else {
         reject();
       }
+      fetchCategories();
+      setCategoryName("");
+      setEditedCategory(null);
     });
     await toast.promise(creationPromise, {
-      loading: 'Creating your new category...',
-      success: 'Category created!',
-      error: 'Failed to create category'
-    })
+      loading: editedCategory
+        ? "Updating category"
+        : "Creating your new category...",
+      success: editedCategory ? "Updated category" : "Category created!",
+      error: editedCategory
+        ? "Failed to update category"
+        : "Failed to create category",
+    });
   }
 
   return (
     <section className="mt-8 max-w-2xl mx-auto">
-      <UserTabs admin={true} />
+      <UserTabs admin={profileData.admin} />
       <form className="mt-8" onSubmit={handleCategorySubmit}>
         <div className="flex gap-2 items-end">
           <div className="grow">
-            <label>New category name</label>
+            <label>
+              {editedCategory ? "Update category" : "New category name"}{" "}
+              {editedCategory && (
+                <>
+                  : <b>{editedCategory.name}</b>
+                </>
+              )}{" "}
+            </label>
             <input
               type="text"
-              value={categoryNewName}
-              onChange={(e) => setNewCategoryName(e.target.value)}
+              value={categoryName}
+              onChange={(e) => setCategoryName(e.target.value)}
             />
           </div>
           <div className="pb-2 flex gap-2">
             <button className="border border-primary" type="submit">
-              Create
+              {editedCategory ? "Update" : "Create"}
             </button>
           </div>
         </div>
       </form>
+      <div>
+        <h2 className="mt-8 text-sm text-gray-500">Existing categories</h2>
+        {categories?.length > 0 &&
+          categories.map((c) => (
+            <button
+              key={c._id}
+              className="bg-gray-100 rounded-xl p-2 px-4 flex gap-1 mb-1 items-center"
+              onClick={() => {
+                setEditedCategory(c);
+                setCategoryName(c.name);
+              }}
+            >
+              {c.name}
+            </button>
+          ))}
+      </div>
     </section>
   );
 }

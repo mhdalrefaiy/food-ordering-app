@@ -21,13 +21,11 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (status === "authenticated") {
-      console.log(session);
+      console.log("test",session);
 
       setUserName(session?.data?.user?.name);
       setImage(session.data.user.image);
       fetch("/api/profile").then((response) => {
-        console.log(response);
-
         response.json().then((data) => {
           setPhone(data.phone);
           setStreetAddress(data.streetAddress);
