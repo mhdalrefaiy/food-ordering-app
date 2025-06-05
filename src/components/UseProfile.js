@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 
-
 export function useProfile() {
-    const [data, setData] = useState(false);
+  const [data, setData] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -14,5 +13,5 @@ export function useProfile() {
       });
     });
   }, []);
-  return {loading, data}
-} 
+  return { loading, data };
+}

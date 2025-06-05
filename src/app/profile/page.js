@@ -1,10 +1,10 @@
 "use client";
 import { useSession } from "next-auth/react";
-import Image from "next/image";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import UserTabs from '../../components/layout/user-tabs'
+import EditableImage from '../../components/layout/EditableImage'
 
 export default function ProfilePage() {
   const session = useSession();
@@ -68,31 +68,7 @@ export default function ProfilePage() {
     });
   }
 
-  async function handleFileCHange(e) {
-    const files = e.target.files;
-    if (files?.length === 1) {
-      const data = new FormData();
-      data.set("file", files[0]);
-      const uploadPromise = new Promise(async (resolve, reject) => {
-        const response = await fetch("/api/upload", {
-          method: "POST",
-          body: data,
-        });
-        if (response.ok) {
-          const { link } = await response.json();
-          setImage(link);
-          resolve();
-        } else {
-          reject();
-        }
-      });
-      await toast.promise(uploadPromise, {
-        loading: "Uploading...",
-        success: "Upload completed",
-        error: "Upload error",
-      });
-    }
-  }
+
 
   if (status === "loading" || !profileFetched) {
     return "Loading...";
@@ -109,26 +85,7 @@ export default function ProfilePage() {
         <div className="flex gap-4">
           <div>
             <div className="p-2 rounded-lg relative max-w-[120px]">
-              {image && (
-                <Image
-                  className="rounded w-full h-full mb-2"
-                  src={image}
-                  width={250}
-                  height={250}
-                  alt={"avatar"}
-                />
-              )}
-
-              <label>
-                <input
-                  type="file"
-                  className="hidden"
-                  onChange={handleFileCHange}
-                />
-                <span className="block border border-gray-300 p-2 text-center rounded-lg cursor-pointer ">
-                  Edit
-                </span>
-              </label>
+              <EditableImage link={image} setLink={setImage} />
             </div>
           </div>
           <form className="grow" onSubmit={handleProfileInfoUpdate}>
