@@ -2,37 +2,42 @@
 import UserTabs from "@/components/layout/user-tabs";
 import { useProfile } from "@/components/UseProfile";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Left from "@/components/icons/left";
-import { redirect } from "next/navigation";
+import { redirect, useParams } from "next/navigation";
 import toast from "react-hot-toast";
 import MenuItemForm from "@/components/layout/MenuItemForm";
-import {validateMenuItem} from '@/utils/validateMenuItem'
+import { validateMenuItem } from "@/utils/validateMenuItem";
 
-export default function NewMenuItemPage() {
+export default function EditMenuItemPage() {
+  const { id } = useParams();
+  const [menuItem, setMenuItem] = useState(null);
   const [redirectToItems, setRedirectToItems] = useState(false);
   const { loading, data } = useProfile();
 
+  useEffect(() => {
+    fetch("/api/menu-items").then((res) => {
+      res.json().then((items) => {
+        const item = items.find((i) => i._id === id);
+        setMenuItem(item);
+      });
+    });
+  }, []);
+
   async function handeFormSubmit(e, data) {
     e.preventDefault();
-
-    if(!validateMenuItem(data)) {
-      return
+    if (!validateMenuItem(data)) {
+      return;
     }
-
+    data = { ...data, _id: id };
     const savingPromise = new Promise(async (resolve, reject) => {
       const response = await fetch("/api/menu-items", {
-        method: "POST",
+        method: "PUT",
         body: JSON.stringify(data),
         headers: { "Content-Type": "application/json" },
       });
-
-      if (response.ok) {
-        resolve();
-      } else {
-        const errorText = await response.text();
-        reject(new Error(errorText || "Failed to save menu item"));
-      }
+      if (response.ok) resolve();
+      else reject();
     });
 
     await toast.promise(savingPromise, {
@@ -64,7 +69,7 @@ export default function NewMenuItemPage() {
           <span>Show all menu items</span>
         </Link>
       </div>
-      <MenuItemForm onSubmit={handeFormSubmit} menuItem={null} />
+      <MenuItemForm onSubmit={handeFormSubmit} menuItem={menuItem} />
     </section>
   );
 }

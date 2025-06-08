@@ -1,7 +1,8 @@
 "use client";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { useState } from "react";
 
 export default function SignupPage() {
@@ -10,6 +11,8 @@ export default function SignupPage() {
   const [creatingUser, setCreateingUser] = useState(false);
   const [createdUser, setCreatedUser] = useState(false);
   const [error, setError] = useState(false);
+  const session = useSession();
+  const { status } = session;
 
   async function handleFormSubmit(e) {
     e.preventDefault();
@@ -26,6 +29,14 @@ export default function SignupPage() {
     }
     setCreateingUser(false);
   }
+
+  if (status === "loading") {
+      return "Loading...";
+    }
+  
+    if (status === "authenticated") {
+      return redirect("/");
+    }
 
   return (
     <section className="mt-8">
@@ -68,7 +79,10 @@ export default function SignupPage() {
         <div className="my-4 text-center text-gray-500">
           or login with provider
         </div>
-        <button className="flex gap-4 justify-center" onClick={() => signIn("google", { callbackUrl: "/" })}>
+        <button
+          className="flex gap-4 justify-center"
+          onClick={() => signIn("google", { callbackUrl: "/" })}
+        >
           <Image src={"/google.png"} alt={""} width={24} height={24} />
           Login with google
         </button>

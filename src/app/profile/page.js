@@ -21,8 +21,6 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (status === "authenticated") {
-      console.log("test",session);
-
       setUserName(session?.data?.user?.name);
       setImage(session.data.user.image);
       fetch("/api/profile").then((response) => {

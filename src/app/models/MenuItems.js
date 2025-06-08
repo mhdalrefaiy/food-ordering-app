@@ -6,11 +6,11 @@ import mongoose, {model, models, Schema} from "mongoose";
 // });
 
 const MenuItemSchema = new Schema({
-  image: {type: String},
-  name: {type: String},
-  description: {type: String},
+  image: {type: String, required: true},
+  name: {type: String, required: true},
+  description: {type: String, required: true},
 //   category: {type: mongoose.Types.ObjectId},
-  basePrice: {type: Number},
+  basePrice: {type: Number, required: true},
 //   sizes: {type:[ExtraPriceSchema]},
 //   extraIngredientPrices: {type:[ExtraPriceSchema]},
 }, {timestamps: true});
