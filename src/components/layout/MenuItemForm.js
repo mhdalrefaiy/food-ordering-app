@@ -26,7 +26,7 @@ export default function MenuItemForm({ onSubmit, menuItem }) {
   return (
     <form
       onSubmit={(e) => onSubmit(e, { image, name, description, basePrice, sizes, extraIngredientPrices, category })}
-      className="mt-8 max-w-md mx-auto"
+      className="mt-8 max-w-2xl mx-auto"
     >
       <div
         className="md:grid items-start gap-4"
