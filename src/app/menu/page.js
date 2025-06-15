@@ -6,6 +6,9 @@ import {useEffect, useState} from "react";
 export default function MenuPage() {
   const [categories, setCategories] = useState([]);
   const [menuItems, setMenuItems] = useState([]);
+  console.log(categories);
+  // console.log();
+  
   useEffect(() => {
     fetch('/api/categories').then(res => {
       res.json().then(categories => setCategories(categories))
@@ -17,6 +20,7 @@ export default function MenuPage() {
   return (
     <section className="mt-8">
       {categories?.length > 0 && categories.map(c => (
+        menuItems.filter(item => item.category === c._id).length > 0 &&
         <div key={c._id}>
           <div className="text-center">
             <SectionHeaders mainHeader={c.name} />
