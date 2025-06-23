@@ -20,48 +20,58 @@ export default function MenuItem(menuItem) {
       return;
     }
     addToCart(menuItem, selectedSize, selectedExtras);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    console.log('hiding popup');
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     setShowPopup(false);
   }
 
   function handleExtraThingClick(ev, extraThing) {
     const checked = ev.target.checked;
     if (checked) {
-      setSelectedExtras(prev => [...prev, extraThing]);
+      setSelectedExtras((prev) => [...prev, extraThing]);
     } else {
-      setSelectedExtras(prev => {
-        return prev.filter(e => e.name !== extraThing.name);
+      setSelectedExtras((prev) => {
+        return prev.filter((e) => e.name !== extraThing.name);
       });
     }
   }
 
-  let selectedPrice = basePrice;
+  let selectedPrice = Number(basePrice);
+
   if (selectedSize) {
-    selectedPrice += selectedSize.price;
+    selectedPrice += Number(selectedSize.price);
   }
+
   if (selectedExtras?.length > 0) {
     for (const extra of selectedExtras) {
-      selectedPrice += extra.price;
+      selectedPrice += Number(extra.price);
     }
   }
+  const hasImage = typeof image === "string" && image.trim().length > 0;
 
   return (
     <>
       {showPopup && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center" onClick={() => setShowPopup(false)}>
-          <div className="my-8 bg-white p-2 rounded-lg max-w-md" onClick={ev => ev.stopPropagation()}>
+        <div
+          className="fixed inset-0 bg-black/80 flex items-center justify-center"
+          onClick={() => setShowPopup(false)}
+        >
+          <div
+            className="my-8 bg-white p-2 rounded-lg max-w-md"
+            onClick={(ev) => ev.stopPropagation()}
+          >
             <div
               className="overflow-y-scroll p-2"
               style={{ maxHeight: "calc(100vh - 100px)" }}
             >
-              {image && <Image
-                src={image}
-                alt={name}
-                width={300}
-                height={200}
-                className="mx-auto"
-              />}
+              {hasImage && (
+                <Image
+                  src={image}
+                  alt={name}
+                  width={300}
+                  height={200}
+                  className="mx-auto"
+                />
+              )}
               <h2 className="text-lg font-bold text-center mb-2">{name}</h2>
               <p className="text-center text-gray-500 text-sm mb-2">
                 {description}
@@ -80,7 +90,7 @@ export default function MenuItem(menuItem) {
                         checked={selectedSize?.name === size.name}
                         name="size"
                       />
-                      {size.name} ${basePrice + size.price}
+                      {size.name} ${Number(basePrice) + Number(size.price)}
                     </label>
                   ))}
                 </div>
@@ -88,32 +98,37 @@ export default function MenuItem(menuItem) {
               {extraIngredientPrices?.length > 0 && (
                 <div className="py-2">
                   <h3 className="text-center text-gray-700">Any extras?</h3>
-                  {extraIngredientPrices.map(extraThing => (
+                  {extraIngredientPrices.map((extraThing) => (
                     <label
                       key={extraThing._id}
-                      className="flex items-center gap-2 p-4 border rounded-md mb-1">
+                      className="flex items-center gap-2 p-4 border rounded-md mb-1"
+                    >
                       <input
                         type="checkbox"
-                        onChange={ev => handleExtraThingClick(ev, extraThing)}
-                        checked={selectedExtras.map(e => e._id).includes(extraThing._id)}
-                        name={extraThing.name} />
+                        onChange={(ev) => handleExtraThingClick(ev, extraThing)}
+                        checked={selectedExtras
+                          .map((e) => e._id)
+                          .includes(extraThing._id)}
+                        name={extraThing.name}
+                      />
                       {extraThing.name} +${extraThing.price}
                     </label>
                   ))}
                 </div>
               )}
-              {image && <FlyingButton
-                targetTop={'5%'}
-                targetLeft={'95%'}
-                src={image}>
-                <div className="primary sticky bottom-2"
-                     >
-                  Add to cart ${selectedPrice}
-                </div>
-              </FlyingButton>}
-              <button
-                className="mt-2"
-                onClick={() => setShowPopup(false)}>
+              {image.trim().length > 0 ? (
+                <FlyingButton targetTop={"5%"} targetLeft={"95%"} src={image}>
+                  <div
+                    className="primary sticky bottom-2"
+                    onClick={handleAddToCartButtonClick}
+                  >
+                    Add to cart ${selectedPrice}
+                  </div>
+                </FlyingButton>
+              ) : (
+                ""
+              )}
+              <button className="mt-2" onClick={() => setShowPopup(false)}>
                 Cancel
               </button>
             </div>
