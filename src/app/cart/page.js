@@ -5,6 +5,7 @@ import SectionHeaders from "@/components/layout/section-headers";
 import CartProduct from "@/components/menu/CartProduct";
 import { useProfile } from "@/components/UseProfile";
 import { useContext, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 export default function CartPage() {
   const { cartProducts, removeCartProduct } = useContext(CartContext);
@@ -28,10 +29,39 @@ export default function CartPage() {
   let subtotal = 0;
   for (const p of cartProducts) {
     subtotal += cartProductPrice(p);
-  }
+  }  
 
   function handleAddressChange(propName, value) {
     setAddress((prevAddress) => ({ ...prevAddress, [propName]: value }));
+  }
+
+  async function proceedToCheckout(ev) {
+    ev.preventDefault();
+    // address and shopping cart products
+
+    const promise = new Promise((resolve, reject) => {
+      fetch('/api/checkout', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          address,
+          cartProducts,
+        }),
+      }).then(async (response) => {
+        if (response.ok) {
+          resolve();
+          window.location = await response.json();
+        } else {
+          reject();
+        }
+      });
+    });
+
+    await toast.promise(promise, {
+      loading: 'Preparing your order...',
+      success: 'Redirecting to payment...',
+      error: 'Something went wrong... Please try again later',
+    })
   }
 
   if (cartProducts?.length === 0) {
@@ -80,7 +110,7 @@ export default function CartPage() {
         </div>
         <div className="bg-gray-100 p-4 rounded-lg">
           <h2>Checkout</h2>
-          <form>
+          <form onSubmit={proceedToCheckout}>
             <AddressInputs
               addressProps={address}
               setAddressProp={handleAddressChange}
