@@ -13,6 +13,14 @@ export default function CartPage() {
   const { data: profileData } = useProfile();
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (window.location.href.includes('canceled=1')) {
+        toast.error('Payment failed 😔');
+      }
+    }
+  }, []);
+
+  useEffect(() => {
     if (profileData?.city) {
       const { phone, streetAddress, city, postalCode, country } = profileData;
       const addressFromProfile = {
