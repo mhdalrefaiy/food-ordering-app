@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { Category } from "../../models/Category";
-import { isAdmin } from "../auth/[...nextauth]/route";
+import { checkAdmin } from "@/app/libs/auth/checkAdmin";
 
 export async function POST(req) {
   mongoose.connect(process.env.MONGO_URL);
@@ -23,7 +23,7 @@ export async function DELETE(req) {
   mongoose.connect(process.env.MONGO_URL);
   const url = new URL(req.url);
   const _id = url.searchParams.get('_id');
-  if (await isAdmin()) {
+  if (await checkAdmin()) {
     await Category.deleteOne({_id});
   }
   return Response.json(true);

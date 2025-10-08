@@ -1,10 +1,10 @@
 import {User} from "@/app/models/User";
 import mongoose from "mongoose";
-import { isAdmin } from "../auth/[...nextauth]/route";
+import { checkAdmin } from "@/app/libs/auth/checkAdmin";
 
 export async function GET() {
   mongoose.connect(process.env.MONGO_URL);
-  if (await isAdmin()) {
+  if (await checkAdmin()) {
     const users = await User.find();
     return Response.json(users);
   } else {
