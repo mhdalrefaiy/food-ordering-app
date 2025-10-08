@@ -1,6 +1,6 @@
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { UserInfo } from "@/app/models/UserInfo";
 import { getServerSession } from "next-auth";
+import { authOptions } from "./authOptions";
 
 export async function checkAdmin(req) {
   const session = await getServerSession(authOptions);
