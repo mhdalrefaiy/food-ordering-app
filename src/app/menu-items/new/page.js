@@ -48,7 +48,7 @@ export default function NewMenuItemPage() {
   }
 
   if (loading) {
-    return "Loading user info...";
+    return "Loading menu info...";
   }
 
   if (!data.admin) {

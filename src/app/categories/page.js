@@ -89,7 +89,7 @@ export default function CategoriesPage() {
     <section className="mt-8 max-w-2xl mx-auto">
       <UserTabs admin={profileData.admin} />
       <form className="mt-8" onSubmit={handleCategorySubmit}>
-        <div className="flex gap-2 items-end">
+        <div className="grid md:flex gap-2 items-end">
           <div className="grow">
             <label>
               {editedCategory ? 'Update category' : 'New category name'}

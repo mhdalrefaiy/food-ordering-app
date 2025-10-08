@@ -74,7 +74,7 @@ export default function EditMenuItemPage() {
   }
 
   if (loading) {
-    return "Loading user info...";
+    return "Loading menu info...";
   }
 
   if (!data.admin) {

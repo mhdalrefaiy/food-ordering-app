@@ -19,7 +19,7 @@ export default function MenuItemsPage() {
   }, []);
 
   if (loading) {
-    return "Loading user info...";
+    return "Loading menu info...";
   }
 
   if (!data.admin) {
