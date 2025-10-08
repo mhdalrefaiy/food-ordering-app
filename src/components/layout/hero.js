@@ -28,9 +28,10 @@ export default function Hero() {
       <div className="relative hidden md:block">
         <Image
           src={"/pizza.png"}
-          objectFit="contain"
-          layout="fill"
+          style={{ objectFit: "contain" }}
+          fill          
           alt="Pizza"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
       </div>
     </section>
